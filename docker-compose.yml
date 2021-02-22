@@ -1,0 +1,146 @@
+version: "3.8"
+
+services:
+  cbt_client:
+    container_name: client
+    build:
+      context: ./client
+      dockerfile: dockerfile.dev
+    restart: always
+    ports:
+      - "3001:3000"
+    stdin_open: true
+    tty: true
+    volumes:
+      - "./client:/app"
+      - /app/node_modules
+
+    environment:
+      - CHOKIDAR_USEPOLLING= true
+      - "CI= true"
+  cbt_api:
+    container_name: cbt_app_server
+    build:
+      context: ./server
+      dockerfile: dockerfile.dev
+    volumes:
+      - /usr/app/node_modules
+      - ./server:/usr/app
+    depends_on:
+      - cbt_localmongo-setup
+    restart: always
+    ports:
+      - 8000:8000
+      - 9229:9229
+    environment:
+      DB_HOST: mongo ## same as the database service name
+      DB_PORT: 27017
+      DB_USER: jamiebones
+      DB_DATABASE: CBT_Database
+      DB_PASSWORD: blazing147
+
+  cbt_localmongo-setup:
+    container_name: cbt_localmongo-setup
+    image: mongo
+    restart: on-failure
+    networks:
+      default:
+    volumes:
+      - ./scripts:/scripts
+    entrypoint: ["/scripts/setup.sh"] # Make sure this file exists (see below for the setup.sh)
+    depends_on:
+      - cbt_localhostmongo1
+      - cbt_localhostmongo2
+      - cbt_localhostmongo3
+
+  cbt_localhostmongo1:
+    hostname: cbt_localhostmongo1
+    container_name: cbt_localhostmongo1
+    image: mongo
+    expose:
+      - 27017
+    ports:
+      - 27017:27017
+    restart: always
+    entrypoint:
+      [
+        "/usr/bin/mongod",
+        "--bind_ip_all",
+        "--replSet",
+        "rs0",
+        "--journal",
+        "--dbpath",
+        "/data/db",
+        "--enableMajorityReadConcern",
+        "false",
+      ]
+    volumes:
+      - $HOME/cbt_data/mongo1_data:/data/db # This is where your volume will persist. e.g. VOLUME-DIR = ./volumes/mongodb
+      - $HOME/cbt_data/mongo1_data_configdb:/data/configdb
+
+  cbt_localhostmongo2:
+    hostname: cbt_localhostmongo2
+    container_name: cbt_localhostmongo2
+    image: mongo
+    expose:
+      - 27017
+    ports:
+      - 27067:27017
+    restart: always
+    entrypoint:
+      [
+        "/usr/bin/mongod",
+        "--bind_ip_all",
+        "--replSet",
+        "rs0",
+        "--journal",
+        "--dbpath",
+        "/data/db",
+        "--enableMajorityReadConcern",
+        "false",
+      ]
+    volumes:
+      - $HOME/cbt_data/mongo2_data:/data/db # This is where your volume will persist. e.g. VOLUME-DIR = ./volumes/mongodb
+      - $HOME/cbt_data/mongo2_data_configdb:/data/configdb
+
+  cbt_localhostmongo3:
+    hostname: cbt_localhostmongo3
+    container_name: cbt_localhostmongo3
+    image: mongo
+    expose:
+      - 27017
+    ports:
+      - 27054:27017
+    restart: always
+    entrypoint:
+      [
+        "/usr/bin/mongod",
+        "--bind_ip_all",
+        "--replSet",
+        "rs0",
+        "--journal",
+        "--dbpath",
+        "/data/db",
+        "--enableMajorityReadConcern",
+        "false",
+      ]
+    volumes:
+      - $HOME/cbt_data/mongo3_data:/data/db # This is where your volume will persist. e.g. VOLUME-DIR = ./volumes/mongodb
+      - $HOME/cbt_data/mongo3_data_configdb:/data/configdb
+
+  cbt_mongo-express:
+    image: mongo-express
+    container_name: cbt_mongo_express
+    restart: always
+    ports:
+      - 8081:8081
+    depends_on:
+      - cbt_localhostmongo1
+      - cbt_localhostmongo2
+      - cbt_localhostmongo3
+    environment:
+      ME_CONFIG_MONGODB_SERVER: cbt_localhostmongo1,cbt_localhostmongo2,cbt_localhostmongo3
+      ME_CONFIG_MONGODB_ADMINUSERNAME: jamiebones
+      ME_CONFIG_MONGODB_ADMINPASSWORD: blazing147
+      ME_CONFIG_BASICAUTH_USERNAME: jamiebones
+      ME_CONFIG_BASICAUTH_PASSWORD: blazing147
