@@ -4,7 +4,7 @@ export default gql`
   extend type Query {
     getExamOfCanidate(examId: ID! ): ExamTaken
     getAllCanidateExam(username: String!): [ExamTaken!]
-    getExamResults(examName: String): [ExamTaken]
+    getExamResults(examScheduleId: ID!): [ExamTaken]
   }
 
   extend type Mutation {

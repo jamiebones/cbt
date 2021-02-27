@@ -2,19 +2,25 @@ var lodash = require("lodash");
 
 export default {
   Query: {
-    getExamResults: async (parent, {}, {}) => {},
+    getExamResults: async ( _ , { examScheduleId }, { models }) => {
+      const results = await models.ExamTaken.find({
+        "examDetails.examinationId": examScheduleId,
+        examFinished: true,
+      });
+      return results;
+    },
     getAllCanidateExam: async (parent, {}, {}) => {},
     getExamOfCanidate: async (parent, { examId }, { models }) => {
-      const result = await models.ExamTaken.findOne({_id: examId});
+      const result = await models.ExamTaken.findOne({ _id: examId });
       return result;
     },
   },
   Mutation: {
     startExam: async (_, { examDetails }, { models }) => {
       //check if the person has an examination running already
-      examDetails.timeExamStarted = new Date();
+      examDetails.examDetails.timeExamStarted = new Date();
       const findExamRunning = await models.ExamTaken.find({
-        "examDetails.examinationId": examDetails.examinationId,
+        "examDetails.examinationId": examDetails.examDetails.examinationId,
         examFinished: false,
       });
 
