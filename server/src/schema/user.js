@@ -19,10 +19,7 @@ export default gql`
 
   union UserDetailsResult = User | Error
 
-  type Error {
-    message: String!
-    type: String!
-  }
+  
 
   type User {
     id: ID!

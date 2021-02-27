@@ -36,6 +36,11 @@ export default gql`
     examTypeName: String!
   }
 
+  type Error {
+    message: String!
+    type: String!
+  }
+
   type ExamSchedule {
     id: ID!
     numberofQuestions: Int!

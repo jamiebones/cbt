@@ -8,12 +8,11 @@ const customScalarResolver = {
   Date: GraphQLDateTime,
 };
 
-
 export default [
   customScalarResolver,
   QuestionResolvers,
   ExamResolvers,
-  //ExamTakenResolvers,
+  ExamTakenResolvers,
   ExamScheduleResolvers,
   UserResolvers,
 ];

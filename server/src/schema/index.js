@@ -24,7 +24,7 @@ const linkSchema = gql`
 export default [
     linkSchema,
     ExamScheduleSchema,
-    //ExamTakenSchema,
+    ExamTakenSchema,
     UserSchema,
     QuestionSchema,
     ExamSchema

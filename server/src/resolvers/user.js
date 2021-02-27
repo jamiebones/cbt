@@ -41,7 +41,7 @@ export default {
         );
 
         return {
-          username: userAccount.id,
+          username: userAccount.username,
           id: userAccount.id,
           token: token,
           name: userAccount.name,

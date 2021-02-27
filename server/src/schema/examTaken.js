@@ -2,48 +2,49 @@ import { gql } from "apollo-server-express";
 
 export default gql`
   extend type Query {
-    getExamOfCanidate(username: String!, examName: String!): ExamTaken
+    getExamOfCanidate(examId: ID! ): ExamTaken
     getAllCanidateExam(username: String!): [ExamTaken!]
     getExamResults(examName: String): [ExamTaken]
   }
 
   extend type Mutation {
-    startExam(examDetails: ExamTakenInput!): ExamTakenSuccess!
-    examEnded(exam: ExamFinishedInput! ): Boolean!
+    startExam(examDetails: ExamTakenInput!): ExamTakenDetails!
+    examEnded(submissionDetails: ExamFinishedInput!): Boolean!
   }
 
-  union ExamTakenDetails = Error | ExamTakenSuccess
+  union ExamTakenDetails = ExamTakenSuccess | Error
 
   type ExamTakenSuccess {
-    type: String!
+    type: String
     message: String!
-    examId: ID!
+    examId: String!
   }
 
   input ExamTakenInput {
-    examDetails: ExamDetails!
+    examDetails: ExamDetailsInput!
     timeExamStarted: Date!
-    candidateDetails: CandidateDetails!
+    canidateDetails: CandidateDetailsInput!
     examStarted: Boolean!
+    examFinished: Boolean!
   }
 
   input ExamFinishedInput {
     examTakenId: ID!
     examFinished: Boolean!
     timeExamEnded: Date
-    score: Number
-    scripts: [ScriptQuestion]
+    score: Int
+    scripts: [ScriptQuestionInput]
   }
 
   type ExamTaken {
     id: ID!
     examDetails: ExamDetails!
     timeExamStarted: Date!
-    candidateDetails: CandidateDetails!
+    canidateDetails: CandidateDetails!
     examStarted: Boolean!
     examFinished: Boolean!
     timeExamEnded: Date
-    score: Number
+    score: Int
     scripts: [ScriptQuestion]
   }
 
@@ -51,6 +52,22 @@ export default gql`
     number: Int
     selectedOption: String
     correctOption: String
+    explanation: String
+    question: String
+  }
+
+  input ScriptQuestionInput {
+    number: Int
+    selectedOption: String
+    correctOption: String
+    explanation: String
+    question: String
+  }
+  input ExamDetailsInput {
+    examinationName: String!
+    examinationId: ID!
+    numberOfQuestions: Int!
+    duration: Int!
   }
 
   type ExamDetails {
@@ -60,6 +77,11 @@ export default gql`
     duration: Int!
   }
   type CandidateDetails {
+    username: String
+    name: String
+  }
+
+  input CandidateDetailsInput {
     username: String
     name: String
   }

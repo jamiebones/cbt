@@ -1,8 +1,13 @@
+var lodash = require("lodash");
+
 export default {
   Query: {
-    getExamOfCanidate: async (parent, {}, {}) => {},
-    getAllCanidateExam: async (parent, {}, {}) => {},
     getExamResults: async (parent, {}, {}) => {},
+    getAllCanidateExam: async (parent, {}, {}) => {},
+    getExamOfCanidate: async (parent, { examId }, { models }) => {
+      const result = await models.ExamTaken.findOne({_id: examId});
+      return result;
+    },
   },
   Mutation: {
     startExam: async (_, { examDetails }, { models }) => {
@@ -12,34 +17,47 @@ export default {
         "examDetails.examinationId": examDetails.examinationId,
         examFinished: false,
       });
-      if (findExamRunning) {
+
+      if (findExamRunning.length > 0) {
         return {
           message: "You already have an examination running",
           type: "ExaminationRunning",
         };
       }
       const newExam = models.ExamTaken(examDetails);
-      const examId = await newExam.save();
+      const doc = await newExam.save();
+
       return {
         message: "Exam started",
         type: "ExamStarted",
-        examId,
+        examId: doc._id.toString(),
       };
     },
-    examEnded: async (_, { examDetails }, { models }) => {
+    examEnded: async (_, { submissionDetails }, { models }) => {
       //check if the person has an examination running already
-      const { examTakenId, examFinished, score, scripts } = examDetails;
+      const { examTakenId, score, scripts } = submissionDetails;
 
-      await models.ExamTaken.findOneAndUpdate(examTakenId, {
-        set: {
-          examFinished,
+      await models.ExamTaken.updateOne(
+        { _id: examTakenId },
+        {
+          examFinished: true,
           timeExamEnded: new Date(),
           score,
           scripts,
-        },
-      });
+        }
+      );
 
       return true;
+    },
+  },
+  ExamTakenDetails: {
+    __resolveType(obj) {
+      if (obj.examId) {
+        return "ExamTakenSuccess";
+      }
+      if (obj.type) {
+        return "Error";
+      }
     },
   },
 };
