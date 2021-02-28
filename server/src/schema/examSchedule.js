@@ -21,7 +21,7 @@ export default gql`
       examSchedule: ExamScheduleInput!
     ): ExamSchedule
     deleteExamSchedule(examScheduleId: ID!): Boolean
-    makeExamActive(examId: ID!): ActiveExamDetails!
+    changeExamStatus(examId: ID!, status: Boolean!): ActiveExamDetails!
   }
 
   union ActiveExamDetails = ActiveExamSuccessful | Error

@@ -42,7 +42,7 @@ export default {
         throw new Error(error.message);
       }
     },
-    makeExamActive: async (_, { examId }, { models }) => {
+    changeExamStatus: async (_, { examId, status }, { models }) => {
       try {
         const findSchedule = await models.ExamSchedule.findById(examId);
         if (!findSchedule) {
@@ -61,15 +61,13 @@ export default {
           };
         }
         await models.ExamSchedule.updateOne(
-          { _id, examId },
+          { _id: examId },
           {
-            set: {
-              active: true,
-            },
+            active: status,
           }
         );
         return {
-          message: "Examination was made active."
+          message: "Examination was made active.",
         };
       } catch (error) {
         console.log(error);
@@ -138,6 +136,16 @@ export default {
       } catch (error) {
         console.log(error);
         throw new Error("Database Error");
+      }
+    },
+  },
+  ActiveExamDetails: {
+    __resolveType(obj) {
+      if (obj.type) {
+        return "Error";
+      }
+      if (obj.message) {
+        return "ActiveExamSuccessful";
       }
     },
   },
