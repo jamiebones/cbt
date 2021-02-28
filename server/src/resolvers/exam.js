@@ -14,7 +14,7 @@ export default {
       //total scripts
       //total questions
       //total users
-  
+
       const [activeExams, totalQuestions, users] = await Promise.all([
         models.ExamSchedule.find({ active: true }).countDocuments(),
         models.Question.countDocuments(),
@@ -44,7 +44,7 @@ export default {
       });
       try {
         await newExam.save();
-        return newExam;
+        return true;
       } catch (error) {
         console.log(error);
         return false;

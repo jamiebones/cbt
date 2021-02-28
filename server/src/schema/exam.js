@@ -8,7 +8,7 @@ export default gql`
   }
 
   extend type Mutation {
-    createExam(examName: String): Exam!
+    createExam(examName: String!): Boolean!
     editExam(examName: String!, examId: ID!): Boolean!
     deleteExam(examId: ID!): Boolean!
   }
