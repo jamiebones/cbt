@@ -57,7 +57,7 @@ export default {
   Mutation: {
     createUser: async (
       parent,
-      { username, password, userType, name },
+      { username, password, userType, name, active },
       { models, user }
     ) => {
       try {
@@ -90,6 +90,7 @@ export default {
           password: hash,
           userType: userType,
           name,
+          active
         });
         await newUser.save();
         return {

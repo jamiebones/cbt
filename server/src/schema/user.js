@@ -12,14 +12,13 @@ export default gql`
     createUser(
       username: String!
       password: String!
-      userType: String
+      userType: String!
       name: String!
+      active: Boolean!
     ): UserDetailsResult!
   }
 
   union UserDetailsResult = User | Error
-
-  
 
   type User {
     id: ID!

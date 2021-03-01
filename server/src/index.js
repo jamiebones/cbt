@@ -45,7 +45,8 @@ async function StartUp() {
     },
     context: async ({ req, connection }) => {
       const user = config.isAuth(req);
-      const secret = config.keys.secret
+      const secret = config.keys.secret;
+      console.log('the login user is', user );
       if (connection) {
         console.log("connection started here please");
         return { models, secret, req, user };
