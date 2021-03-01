@@ -6,6 +6,22 @@ const saltRounds = 10;
 
 export default {
   Query: {
+    usersByStatus: async (parent, { status, offset }, { models }) => {
+      const query = models.User.find({
+        active: status,
+      });
+      const totalUsersByStatus = await models.User.find({
+        active: status,
+      }).countDocuments();
+      //query.sort({ createdAt: -1 });
+      query.skip(offset);
+      query.limit(50);
+      const users = await query.exec();
+      return {
+        users,
+        totalUsersByStatus,
+      };
+    },
     loginUser: async (
       parent,
       { username, password },
@@ -27,6 +43,15 @@ export default {
           return {
             type: "FailedCredentialsError",
             message: "Incorrect credentials",
+          };
+        }
+
+        //check if the user is active before allowing login
+        if (userAccount.active === false) {
+          return {
+            type: "Account Not Active Error",
+            message:
+              "Login unsuccessful because your account is inactive. Please contact admin",
           };
         }
 
@@ -55,6 +80,20 @@ export default {
   },
 
   Mutation: {
+    changeUserStatus: async (_, { id, active }, { models }) => {
+      await models.User.updateOne({ _id: id }, { active: !active });
+      return true;
+    },
+    changePassword: async (_, { username, newPassword }, { models }) => {
+      const user = await models.User.findOne({ username });
+      if (!user) {
+        throw new Error("user details not found");
+      }
+      //change the password here
+      const hash = await bcrypt.hash(newPassword, saltRounds);
+      user.password = hash;
+      await user.save();
+    },
     createUser: async (
       parent,
       { username, password, userType, name, active },
@@ -85,12 +124,13 @@ export default {
         }
         //lets continue
         const hash = await bcrypt.hash(password, saltRounds);
+
         const newUser = new models.User({
           username: username.toLowerCase(),
           password: hash,
           userType: userType,
           name,
-          active
+          active,
         });
         await newUser.save();
         return {

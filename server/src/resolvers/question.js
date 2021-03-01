@@ -43,7 +43,6 @@ export default {
       };
     },
     getAllQuestions: async (parent, { offset, examId }, { models }) => {
-      debugger;
       const query = models.Question.find({ examId: examId });
       const totalQuestion = await models.Question.find({
         examId,

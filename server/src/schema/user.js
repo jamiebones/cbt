@@ -5,10 +5,12 @@ export default gql`
     loginUser(username: String!, password: String!): UserDetailsResult
     #users: [User!]
     #user(id: ID!): User
-    #activeUsers(active: Boolean!): [ User! ]
+    usersByStatus(status: Boolean!, offset: Int!): UserQueryResult!
   }
 
   extend type Mutation {
+    changePassword(username: String!, newPassword: String!): Boolean!
+    changeUserStatus(id: ID!, active: Boolean!): Boolean!
     createUser(
       username: String!
       password: String!
@@ -28,5 +30,10 @@ export default gql`
     active: Boolean
     name: String
     token: String
+  }
+
+  type UserQueryResult {
+    users: [User]
+    totalUsersByStatus: Int
   }
 `;
